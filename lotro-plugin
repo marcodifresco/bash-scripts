@@ -1,0 +1,4 @@
+#!/bin/bash
+export WINEPREFIX=/games/lotro/
+cd $WINEPREFIX/drive_c/Program\ Files\ \(x86\)/StandingStoneGames/The\ Lord\ of\ the\ Rings\ Online/
+./plugincompendium.sh

@@ -1,0 +1,16 @@
+#!/bin/bash
+# If you want to receive the mail to an acutal e-mail address you need to modify
+# /etc/aliases (path may change on your system) accordingly for the user this
+# script will run under.
+
+# Sincronize the Portage tree
+/usr/bin/eix-sync
+
+# Send an e-mail with the available updates
+/usr/bin/emerge --pretend --update --deep --newuse world > /tmp/update-`date +%Y%m%d`.log
+/usr/bin/mail -s "Updates on `date +%d\/%m\/%Y` for $HOSTNAME" $USER <  /tmp/update-`date +%Y%m%d`.log
+/bin/rm /tmp/update-`date +%Y%m%d`.log
+
+# Pre-download the available updates
+/usr/bin/emerge --fetchonly --update --deep --newuse world
+

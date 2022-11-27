@@ -1,0 +1,6 @@
+#!/bin/bash
+vendor=$(lscpu | awk '/Vendor ID/{print $3}') ; if [[ "$vendor" == "GenuineIntel" ]]; then
+watch "sensors | grep Core"
+else
+watch "sensors | grep Composite"
+fi

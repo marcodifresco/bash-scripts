@@ -1,0 +1,6 @@
+#!/bin/bash
+export CCACHE_DISABLE=1
+
+/usr/bin/vim ~/.xmonad/xmonad.hs
+/usr/bin/xmonad --recompile
+

@@ -1,0 +1,3 @@
+#!/bin/sh
+/usr/bin/nvidia-settings -l --config=~/.nvidia-settings-rc &
+

@@ -1,0 +1,5 @@
+#!/bin/bash
+emerge --ask --update --deep --with-bdeps=y --newuse --keep-going @world
+emerge --ask --depclean
+emerge @preserved-rebuild
+revdep-rebuild -ip

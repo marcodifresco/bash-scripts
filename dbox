@@ -1,0 +1,4 @@
+#!/bin/bash
+killall dropbox
+sleep 5
+dropbox &

@@ -1,0 +1,4 @@
+#!/bin/bash
+killall easyeffects
+sleep 5
+/usr/bin/easyeffects -l ziyad_perfecteq --gapplication-service &
