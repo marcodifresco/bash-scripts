@@ -1,6 +1,6 @@
 #!/bin/bash
 export WINEPREFIX="/home/$USER/.config/projectascension/WoW"
-export WINEARCH=win32
+#export WINEARCH=win32
 export DXVK_FILTER_DEVICE_NAME="NVIDIA GeForce RTX 3090"
 export WINE_LARGE_ADDRESS_AWARE=1
 ~/.config/projectascension/WoW/drive_c/ascension-launcher.appimage
