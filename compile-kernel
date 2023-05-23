@@ -40,7 +40,3 @@ genkernel --oldconfig --menuconfig --save-config --install --microcode=$vendorco
 echo "Removing old kernels from /boot"
 eclean-kernel -n 2 -d
 
-
-# Regenerate Grub menu
-#echo "Updating Grub configuration"
-#LANG=C grub-mkconfig -o /boot/grub/grub.cfg
