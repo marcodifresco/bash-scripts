@@ -31,11 +31,6 @@ cd /usr/src/linux
 genkernel --oldconfig --menuconfig --save-config --install --microcode=$vendorcompile --bootloader=grub2 all
 
 
-# Recompile external kernel modules
-#echo "Recompiling the kernel external modules"
-#emerge @module-rebuild
-
-
 # Remove old kernels (keep the above one and the now penultimate)
 echo "Removing old kernels from /boot"
 eclean-kernel -n 2 -d
