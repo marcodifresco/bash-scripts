@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Variables
+LOGFILE="/tmp/clamav-$(date +'%Y-%m-%d').log";
+HOST="$(hostname --long)";
+EMAIL_MSG="Please see the log file attached.";
+EMAIL_FROM="clamav@"$HOST"";
+EMAIL_TO="marco.difresco@gmail.com";
+DIRTOSCAN="/home";
+
+# Scan the system
+/usr/bin/clamscan -ri / --exclude-dir=/sys/ > "$LOGFILE"
+
+# Check if actual viruses are found
+MALWARE=$(tail "$LOGFILE"|grep Infected|cut -d" " -f3);
+
+# Send the report
+#if [ "$MALWARE" -ne "0" ]; then
+#    echo "$EMAIL_MSG"|mail -a "$LOGFILE" -s "ClamAV: Malware Found" -r "$EMAIL_FROM" "$EMAIL_TO";
+#fi
+
+#echo "$MALWARE"|mail -a "$LOGFILE" -s "ClamAV: Malware Found" -r "$EMAIL_FROM" "$EMAIL_TO";
+
