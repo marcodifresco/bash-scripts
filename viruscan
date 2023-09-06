@@ -9,15 +9,10 @@ EMAIL_TO="marco.difresco@gmail.com";
 DIRTOSCAN="/home";
 
 # Scan the system
-/usr/bin/clamscan -ri / --exclude-dir=/sys/ > "$LOGFILE"
+/usr/bin/clamscan -ri / --exclude-dir=/sys/ --exclude=backups --exclude=logs --exclude=errors > "$LOGFILE"
 
-# Check if actual viruses are found
-MALWARE=$(tail "$LOGFILE"|grep Infected|cut -d" " -f3);
-
-# Send the report
-#if [ "$MALWARE" -ne "0" ]; then
-#    echo "$EMAIL_MSG"|mail -a "$LOGFILE" -s "ClamAV: Malware Found" -r "$EMAIL_FROM" "$EMAIL_TO";
-#fi
-
-#echo "$MALWARE"|mail -a "$LOGFILE" -s "ClamAV: Malware Found" -r "$EMAIL_FROM" "$EMAIL_TO";
-
+# Send report
+if grep -rl 'Infected files: 0' $LOGFILE
+then echo "No viruses fonud"
+else cat $LOGFILE | mail -s "Viruses found on $HOST" $EMAIL_TO
+fi
