@@ -4,5 +4,4 @@ export WINEPREFIX="/home/$USER/.config/projectascension/WoW"
 export DXVK_FILTER_DEVICE_NAME="NVIDIA GeForce RTX 3090"
 export WINE_LARGE_ADDRESS_AWARE=1
 export LIBVA_DRIVER_NAME=nvidia
-/home/marco/.config/projectascension/ascension-launcher.AppImage
-
+/home/marco/.config/projectascension/ascension-launcher.appimage
