@@ -9,7 +9,7 @@ EMAIL_TO="marco.difresco@gmail.com";
 DIRTOSCAN="/home";
 
 # Scan the system
-/usr/bin/clamscan -ri / --exclude-dir=/sys/ --exclude=backups --exclude=logs --exclude=errors > "$LOGFILE"
+/usr/bin/clamscan -r / --exclude-dir=/bin/ --exclude-dir=/sbin/ --exclude-dir=/proc/ --exclude-dir=/sys/ --exclude-dir=/run/ --exclude=backups --exclude=logs --exclude=errors > "$LOGFILE"
 
 # Send report
 if grep -rl 'Infected files: 0' $LOGFILE
