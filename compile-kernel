@@ -28,7 +28,7 @@ if [ ! -f /usr/src/linux/.config ]; then cp /etc/kernels/kernel-config-$(uname -
 # Actual kernel compilation and installation
 echo "Compiling the kernel"
 cd /usr/src/linux
-genkernel --oldconfig --menuconfig --module-rebuild --save-config --install --microcode=$vendorcompile --bootloader=grub2 all
+genkernel --oldconfig --menuconfig --module-rebuild --save-config --install  --microcode=$vendorcompile --bootloader=grub2 all
 
 
 # Remove old kernels (keep the above one and the now penultimate)
