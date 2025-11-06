@@ -1,3 +1,16 @@
 #!/bin/bash
-wl-paste -t text -w xclip -selection clipboard &
 
+# 2025-10-30
+# Since 6.5 Plasma Bug:  Paste into notepad++ or WInmerge not working in crossover
+last=""
+QDBUS_BIN="/usr/bin/qdbus6"
+dbus-monitor "type='signal',interface='org.kde.klipper.klipper'" |
+  grep --line-buffered "signal" | while read -r _; do
+  text="$("$QDBUS_BIN" org.kde.klipper /klipper getClipboardContents 2>/dev/null)"
+  if [ -n "$text" ] && [ "$text" != "$last" ]; then
+    #echo "New copy detected → syncing to X11 clipboard: $text"
+    printf "%s" "$text" | xclip -selection clipboard
+    last="$text"
+  fi
+done
+exit 0
