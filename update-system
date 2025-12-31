@@ -1,5 +1,5 @@
 #!/bin/bash
-emerge --ask --update --deep --with-bdeps=y --newuse --keep-going --getbinpkg --binpkg-respect-use=y @world
+emerge --ask --update --deep --with-bdeps=y --newuse --keep-going --binpkg-respect-use=y @world
 emerge --ask --depclean
 emerge @preserved-rebuild
 revdep-rebuild -ip

@@ -1,0 +1,13 @@
+#!/bin/bash
+# 5950X CCD0 Pinning Script
+# CCD0: Cores 0-7 (Threads 0-7, 16-23)
+# CCD1: Cores 8-15 (Threads 8-15, 24-31)
+
+if [ -z "$1" ]; then
+    echo "Usage: game-run <executable> [args]"
+    exit 1
+fi
+
+# We use taskset to mask the CPU affinity. 
+# Hex mask 0x00FF00FF selects threads 0-7 and 16-23.
+taskset -c 0-7,16-23 "$@"
