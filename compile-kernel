@@ -16,8 +16,7 @@ else
   echo "Generating new AMD microcode cpio"
   [ -f /boot/amd-uc.img ] && rm /boot/amd-uc.img
   echo "Generating new AMD microcode cpio"
-  find /lib/firmware/amd-ucode -name "microcode_amd*.bin" |
-    bsdcpio -o -H newc -R 0:0 >/boot/amd-uc.img
+  T=$(mktemp -d) && mkdir -p "$T/kernel/x86/microcode" && cat /lib/firmware/amd-ucode/microcode_amd*.bin >"$T/kernel/x86/microcode/AuthenticAMD.bin" && (cd "$T" && find . -type f | bsdcpio -o -H newc -R 0:0 >/boot/amd-uc.img) && rm -rf "$T" && sync
   vendorcompile=amd
 fi
 
