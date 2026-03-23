@@ -12,8 +12,8 @@ RCLONE_ARGS=(
   "--exclude" ".stfolder/**"
   "--exclude" "EVE/logs/**" # <-- THE CORRECTED LINE
   "--exclude" "The Lord of the Rings Online"
-  "--drive-import-formats" "docx,xlsx,pptx,odt,ods"
-  "--drive-export-formats" "docx,xlsx,pptx,odt,ods"
+  "--drive-import-formats" "docx,xlsx,pptx"
+  "--drive-export-formats" "docx,xlsx,pptx"
   "--track-renames"
   "--verbose"
   "--log-file=$HOME/.local/state/rclone-bisync.log"
