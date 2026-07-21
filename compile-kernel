@@ -5,43 +5,100 @@ export CCACHE_DISABLE=1
 export MAKEOPTS="-j$(nproc)"
 set -euo pipefail
 
+# Argument Parsing
+SKIP_MENUCONFIG=0
+if [[ "${1:-}" == "--auto" ]]; then
+  echo "Running in automated mode: skipping menuconfig."
+  SKIP_MENUCONFIG=1
+fi
+
+# Update Grub2
+echo "Reinstalling GRUB2..."
+/usr/bin/grub-install --efi-directory=/efi
+
 # Generating CPU microcode
 vendor=$(lscpu | awk '/Vendor ID/{print $3}')
 if [[ "$vendor" == "GenuineIntel" ]]; then
   echo "Generating new Intel microcode cpio"
   [ -f /boot/early_ucode.cpio ] && rm /boot/early_ucode.cpio
   /usr/sbin/iucode_tool -S --write-earlyfw=/boot/early_ucode.cpio /lib/firmware/intel-ucode/*
-  vendorcompile=intel
 else
   echo "Generating new AMD microcode cpio"
   [ -f /boot/amd-uc.img ] && rm /boot/amd-uc.img
-  echo "Generating new AMD microcode cpio"
   T=$(mktemp -d) && mkdir -p "$T/kernel/x86/microcode" && cat /lib/firmware/amd-ucode/microcode_amd*.bin >"$T/kernel/x86/microcode/AuthenticAMD.bin" && (cd "$T" && find . -type f | bsdcpio -o -H newc -R 0:0 >/boot/amd-uc.img) && rm -rf "$T" && sync
-  vendorcompile=amd
 fi
 
-# If it is a new kernel version, get a copy of the current usable config
-if [ ! -f /usr/src/linux/.config ]; then
+# Config preparation
+cd /usr/src/linux
+if [ ! -f .config ]; then
   echo "Copying kernel config from current running kernel..."
   if [ -f /proc/config.gz ]; then
-    zcat /proc/config.gz >/usr/src/linux/.config
+    zcat /proc/config.gz >.config
   elif [ -f /etc/kernels/kernel-config-$(uname -r) ]; then
-    cp /etc/kernels/kernel-config-$(uname -r) /usr/src/linux/.config
+    cp /etc/kernels/kernel-config-$(uname -r) .config
   else
     echo "No existing config found. Using defconfig."
     make defconfig
   fi
 fi
 
-# Actual kernel compilation and installation
-echo "Compiling the kernel"
-cd /usr/src/linux
-genkernel --oldconfig --menuconfig --module-rebuild --save-config --install --microcode=$vendorcompile --bootloader=grub2 all
+# Configuration interface
+echo "Configuring the kernel..."
+make $MAKEOPTS oldconfig
+if [[ $SKIP_MENUCONFIG -eq 0 ]]; then
+  make menuconfig
+fi
 
-# Update Grub2. This should be redundant, but I had cases where I could not boot to the new kernel due to Grub ... disappearing from the boot
-/usr/bin/grub-install --efi-directory=/efi
-/usr/bin/grub-mkconfig -o /boot/grub/grub.cfg
+# Compilation
+echo "Compiling the kernel and modules..."
+make $MAKEOPTS
 
-# Remove old kernels (keep the above one and the now penultimate)
+# Installation of in-tree modules
+echo "Installing modules..."
+make $MAKEOPTS modules_install
+
+# Wait for the parent emerge process to finish to release the Portage lock
+echo "Waiting for active emerge processes to complete before rebuilding modules..."
+while pgrep -x emerge >/dev/null; do
+  sleep 5
+done
+
+# Rebuild out-of-tree modules (Nvidia, Razer) BEFORE generating the initramfs
+# Nullify EMERGE_DEFAULT_OPTS to bypass --update and force the rebuild
+echo "Rebuilding external modules..."
+EMERGE_DEFAULT_OPTS="" emerge --oneshot @module-rebuild
+
+# Install the kernel and trigger installkernel hooks (Dracut / UKI / GRUB)
+echo "Installing the kernel (triggering installkernel hooks)..."
+make install
+
+# Sign the generated UKI for Secure Boot
+echo "Signing the Unified Kernel Image..."
+
+if [ -f /etc/kernel/entry-token ]; then
+  KERNEL_MACH_ID=$(cat /etc/kernel/entry-token)
+else
+  KERNEL_MACH_ID=$(cat /etc/machine-id)
+fi
+
+KERNEL_RELEASE=$(make kernelrelease)
+UKI_PATH="/efi/EFI/Linux/${KERNEL_MACH_ID}-${KERNEL_RELEASE}.efi"
+
+if [ -f "$UKI_PATH" ]; then
+  sbsign --key /etc/efi-keys/MOK.priv \
+    --cert /etc/efi-keys/MOK.pem \
+    --output "$UKI_PATH" \
+    "$UKI_PATH"
+  echo "Successfully signed UKI: $UKI_PATH"
+else
+  echo "Error: UKI not found at $UKI_PATH. Skipping Secure Boot signing."
+fi
+
+# Save configuration for future reference
+echo "Saving configuration to /etc/kernels/"
+mkdir -p /etc/kernels
+cp .config /etc/kernels/kernel-config-${KERNEL_RELEASE}
+
+# Remove old kernels
 echo "Removing old kernels from /boot"
 eclean-kernel -n 2 -d

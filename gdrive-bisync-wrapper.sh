@@ -17,6 +17,7 @@ RCLONE_ARGS=(
   "--track-renames"
   "--verbose"
   "--log-file=$HOME/.local/state/rclone-bisync.log"
+  "--force"
 )
 
 # Check if the tracking file exists
